@@ -13,9 +13,18 @@ libs_ld_contents = """GROUP(
 )
 """
 
+STM32F0_Compiler_Flags = [ "-mthumb", "-mcpu=cortex-m0" ]
+STM32F1_Compiler_Flags = [ "-mthumb", "-mcpu=cortex-m3" ]    
 STM32F2_Compiler_Flags = [ "-mthumb", "-mcpu=cortex-m3" ]
 STM32F4_Compiler_Flags = [ "-mthumb", "-mcpu=cortex-m4", "-mfloat-abi=hard", "-mfpu=fpv4-sp-d16" ]
 STM32F7_Compiler_Flags = [ "-mthumb", "-mcpu=cortex-m7", "-mfloat-abi=hard", "-mfpu=fpv5-sp-d16" ]
+
+Linker_Flags = [ "-Xlinker",
+        	 "--gc-sections",
+        	 "-lgcc",
+        	 "-lc",
+        	 "-specs=nosys.specs",
+        	 "-lnosys" ]
 
 project_name = ""
 processor_name = ""
@@ -77,15 +86,22 @@ def parsePackage(pack) :
 	result += "    cpp.includePaths : " + qbsWriteArray(includepaths, "        ") + "\n"
 	result += "    cpp.linkerScripts : [ \"" + processor_name + "_FLASH.ld\", \"LIBS.ld\"" + " ]\n"
 
-	if "STM32F2" in processor_name :
+	if "STM32F0" in processor_name :
+		result += "    cpp.commonCompilerFlags: " + qbsWriteArray(STM32F0_Compiler_Flags, "        ")
+		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F0_Compiler_Flags + Linker_Flags, "        ")
+	elif "STM32F1" in processor_name :
+		result += "    cpp.commonCompilerFlags: " + qbsWriteArray(STM32F1_Compiler_Flags, "        ")
+		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F1_Compiler_Flags + Linker_Flags, "        ")
+	elif "STM32F2" in processor_name :
 		result += "    cpp.commonCompilerFlags: " + qbsWriteArray(STM32F2_Compiler_Flags, "        ")
-		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F2_Compiler_Flags, "        ")
+		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F2_Compiler_Flags + Linker_Flags, "        ")
 	elif "STM32F4" in processor_name :
 		result += "    cpp.commonCompilerFlags: " + qbsWriteArray(STM32F4_Compiler_Flags, "        ")
-		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F4_Compiler_Flags, "        ")
+		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F4_Compiler_Flags + Linker_Flags, "        ")
 	elif "STM32F7" in processor_name :
 		result += "    cpp.commonCompilerFlags: " + qbsWriteArray(STM32F7_Compiler_Flags, "        ")
-		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F7_Compiler_Flags, "        ")
+		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F7_Compiler_Flags + Linker_Flags, "        ")
+
 
 	result += "    cpp.defines: [ \"" + processor_name[0:9] + "xx\" ]\n"
 
