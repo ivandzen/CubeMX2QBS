@@ -15,6 +15,7 @@ import xml.etree.ElementTree as ET
 import json
 import argparse
 import os.path
+import re
 
 libs_ld_contents = """GROUP(
  libgcc.a
@@ -71,11 +72,12 @@ def qbsWriteItem(name, elements, str_prefix = "") :
 	result += "\n" + str_prefix + "}"
 	return result
 
+
 ################################################################################
 
 def parsePackage(pack) :
 	global project_name
-
+	defineProcessorName = ''
 	tmp = ""
 	for child in pack :
 		if child.tag == 'name' :
@@ -88,6 +90,18 @@ def parsePackage(pack) :
 			tmp += parseConditions(child)
 		elif child.tag == 'components' :
 			tmp += parseComponents(child)
+			# find the lines like:
+			# <file category="sourceAsm" condition="GCC Toolchain"
+			# name="Drivers\CMSIS\Device\ST\STM32F1xx\Source\Templates\gcc\startup_stm32f103xb.s"/>
+			# and extract the stm32f103xb from them
+			for component in child :
+				if ('Cgroup' in component.attrib and component.attrib['Cgroup'] == 'Startup') :
+					for files in component.findall('files') :
+						for f in files.findall('file') :
+							if ('condition' in f.attrib and f.attrib['condition'] == 'GCC Toolchain') :
+								result = re.match( r'.*startup_(.*)\.s', f.attrib['name'], re.M|re.I)
+								print result.group(1).upper()
+								defineProcessorName = result.group(1).upper().replace('X', 'x')
 
 	result = "import qbs\n\n"
 	result += "Product {\n"
@@ -116,7 +130,7 @@ def parsePackage(pack) :
 		result += "    cpp.linkerFlags: " + qbsWriteArray(STM32F7_Compiler_Flags + Linker_Flags, "        ")
 
 
-	result += "    cpp.defines: [ \"" + processor_name[0:9] + "xx\" ]\n"
+	result += "    cpp.defines: [ \"" + defineProcessorName + "\" ]\n"
 
 	result += tmp
 	result += "}"
