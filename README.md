@@ -7,5 +7,4 @@ How to Use :
   1. Create and configure project in STM32CubeMX application.
   2. Generate source code for "Other toolchain (GPDSC)"
   3. Run : "python cubemx2qbs.py |your_project|.gpdsc" This comand will generate file |your_project|.qbs
-  4. VERY IMPORTANT! You still have to select target device by adding appropriate target name in "cpp.defines" section in QBS file. For example if you using STM32F030R8T6 microcontroller just add "STM32F030x8". Full list of convenient target names may be found in STM32 Family header file (stm32f0xx.h as an example)
-  5. Open QBS project file in QtCreator and start writing your app!
+  4. Open QBS project file in QtCreator and start writing your app!
